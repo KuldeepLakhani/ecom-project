@@ -80,15 +80,16 @@ public class ProductController {
 @PostMapping(value = "/product", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 public ResponseEntity<?> addProduct(
         @RequestPart("product") Product product,
-        @RequestPart("imageFile") MultipartFile imageFile
+        @RequestPart(value = "imageFile", required = false) MultipartFile imageFile
 ) throws IOException {
 
-    System.out.println("ok controller hit");
+    System.out.println("controller hit");
 
-    product.setImageName(imageFile.getOriginalFilename());
-    product.setImageType(imageFile.getContentType());
-    product.setImageDate(imageFile.getBytes());
-
+    if (imageFile != null && !imageFile.isEmpty()) {
+        product.setImageName(imageFile.getOriginalFilename());
+        product.setImageType(imageFile.getContentType());
+        product.setImageDate(imageFile.getBytes());
+    }
 
     return ResponseEntity.ok(repo.save(product));
 }

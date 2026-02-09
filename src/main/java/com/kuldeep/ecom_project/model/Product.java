@@ -25,7 +25,7 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     private String name;
     private String description;
     private BigDecimal price;
@@ -34,8 +34,8 @@ public class Product {
 
     //@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
 //    private Date releaseDate;
-    private boolean available;
-    private int quantity;
+    private Boolean available;
+    private Integer quantity;
 
 
     private String imageName;
