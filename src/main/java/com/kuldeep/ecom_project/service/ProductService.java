@@ -25,11 +25,11 @@ public class ProductService {
         return repo.findById(id).orElse(null);
     }
 
-//    public Product addProduct(Product product) {
-//        return repo.save(product);
-//    }
 
-    public Product updateProduct(Product product) {
+    public Product updateProduct(int id, Product product, MultipartFile imageFile) throws IOException {
+        product.setImageData(imageFile.getBytes());
+        product.setImageName(imageFile.getOriginalFilename());
+        product.setImageType(imageFile.getContentType());
         return repo.save(product);
     }
 
@@ -41,8 +41,12 @@ public class ProductService {
         System.out.println("ok");
         product.setImageName(imageFile.getOriginalFilename());
         product.setImageType(imageFile.getContentType());
-        product.setImageDate(imageFile.getBytes());
+        product.setImageData(imageFile.getBytes());
         return repo.save(product);
 
+    }
+
+    public List<Product> serviceProducts(String keyword) {
+    return repo.searchProducts(keyword);
     }
 }

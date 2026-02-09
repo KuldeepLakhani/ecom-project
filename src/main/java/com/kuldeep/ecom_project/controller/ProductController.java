@@ -19,7 +19,7 @@ import java.sql.SQLOutput;
 import java.util.List;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api")
 public class ProductController {
 
@@ -59,8 +59,16 @@ public class ProductController {
 //}
 
 @DeleteMapping("product/{id}")
-    public void deleteProduct(@PathVariable int id){
-    service.deleteProductById(id);
+    public ResponseEntity<String> deleteProduct(@PathVariable int id){
+    Product product = service.getProductById(id);
+    if (product != null){
+        service.deleteProductById(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    else {
+        return new ResponseEntity<>("not there",HttpStatus.NOT_FOUND);
+    }
+
 }
 
 //    @PostMapping("/product")
@@ -77,31 +85,50 @@ public class ProductController {
 //            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 //        }
 //    }
-@PostMapping(value = "/product", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+@PostMapping(value = "/product")
 public ResponseEntity<?> addProduct(
         @RequestPart("product") Product product,
-        @RequestPart(value = "imageFile", required = false) MultipartFile imageFile
-) throws IOException {
-
-    System.out.println("controller hit");
-
-    if (imageFile != null && !imageFile.isEmpty()) {
-        product.setImageName(imageFile.getOriginalFilename());
-        product.setImageType(imageFile.getContentType());
-        product.setImageDate(imageFile.getBytes());
+        @RequestPart MultipartFile imageFile
+){
+    try{
+        System.out.println(product);
+        Product product1 = service.addProduct(product,imageFile);
+        return new ResponseEntity<>(product1,HttpStatus.CREATED);
     }
-
-    return ResponseEntity.ok(repo.save(product));
+    catch (Exception e){
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
 }
 
 
 
-
-    @GetMapping("/produt/{productId}/image")
+    @GetMapping("/product/{productId}/image")
 public ResponseEntity<byte[]> getImageByProductId(@PathVariable int productId){
 
     Product product = service.getProductById(productId);
-    byte[] imageFile = product.getImageDate();
+    byte[] imageFile = product.getImageData();
     return  ResponseEntity.ok().contentType(MediaType.valueOf(product.getImageType())).body(imageFile);
 }
+
+@PutMapping("/product/{id}")
+public ResponseEntity<String> updateProduct(@PathVariable int id, @RequestPart("product") Product product , @RequestPart MultipartFile imageFile) {
+  Product product1 = null;
+   try {
+        product1 = service.updateProduct(id,product,imageFile);
+   }catch (Exception e){
+       return new ResponseEntity<>("Failed to update",HttpStatus.BAD_REQUEST);
+   }
+   if(product1 != null)
+       return new ResponseEntity<>("Update", HttpStatus.OK);
+   else
+       return new ResponseEntity<>("Failed to update",HttpStatus.BAD_REQUEST);
+}
+
+    @GetMapping("/products/search")
+    public ResponseEntity<List<Product>> searchProduct(@RequestParam String keyword){
+    System.out.println("searching with "+keyword);
+    List<Product> products = service.serviceProducts(keyword);
+    return new ResponseEntity<>(products, HttpStatus.OK);
+    }
+
 }
